@@ -32,12 +32,8 @@ workflows:
 
       - name: 🏗 Build unsigned iOS dev client
         script: |
-          set -e
           set -o pipefail
           cd ios
-          
-          # AD_HOC_CODE_SIGNING_ALLOWED=YES is critical for unsigned device builds on Codemagic.
-          # CLANG_CXX flags ensure C++20 compatibility for llama.rn and Worklets.
           xcodebuild \
             -workspace exposink.xcworkspace \
             -scheme exposink \
@@ -48,36 +44,24 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES \
-            CLANG_CXX_LANGUAGE_STANDARD="c++20" \
-            CLANG_CXX_LIBRARY="libc++" \
-            OTHER_CPLUSPLUSFLAGS="-DFORCE_CXX20" \
             build | tee build.log
 
       - name: 📦 Create unsigned IPA
         script: |
-          set -e
           cd ios
-          
-          # Dynamically find the app bundle to be safe
-          APP=$(find build/Build/Products -name "*.app" | head -n 1)
-          
+          # Dynamically find the app bundle to be safe (handles naming variations)
+          APP=$(find build/Build/Products/Debug-iphoneos -name "*.app" | head -n 1)
+
           if [ -z "$APP" ]; then
-            echo "❌ Error: .app bundle not found in build directory. Check build.log."
-            exit 1
-          fi
-          
-          echo "Found app bundle at: $APP"
-          
-          # Verify Info.plist exists
-          if [ ! -f "$APP/Info.plist" ]; then
-            echo "❌ Error: Info.plist missing from $APP. Build may have failed silently."
+            echo "❌ Error: .app bundle not found in build directory."
             exit 1
           fi
 
+          echo "✅ Found app bundle: $APP"
           rm -rf Payload exposink-dev-client.ipa
           mkdir -p Payload
-          cp -R "$APP" Payload/
+          # -L ensures we follow symlinks (critical for some native modules)
+          cp -RL "$APP" Payload/
           zip -qry exposink-dev-client.ipa Payload
           mv exposink-dev-client.ipa $CM_EXPORT_DIR
 
