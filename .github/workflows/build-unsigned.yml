@@ -40,16 +40,16 @@ jobs:
           set -o pipefail
           cd ios
 
-          xcodebuild \
-            -workspace exposink.xcworkspace \
-            -scheme exposink \
+          xcodebuild build \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
             -configuration Debug \
             -destination 'generic/platform=iOS' \
-            -sdk iphoneos \
-            -derivedDataPath build \
+            -derivedDataPath $PWD/DerivedData \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
+            CLANG_CXX_LANGUAGE_STANDARD="c++20" \
+            CLANG_CXX_LIBRARY="libc++" \
             build | tee build.log
 
       - name: 📦 Create unsigned IPA
