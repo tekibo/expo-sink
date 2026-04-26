@@ -8,7 +8,8 @@
     "scheme": "exposink",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.tekibo.exposink"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +18,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.tekibo.exposink"
     },
     "web": {
       "output": "static",
@@ -34,7 +36,80 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "launcher"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "ExpoSink needs camera access for testing apps.",
+          "microphonePermission": "ExpoSink needs microphone access for testing apps."
+        }
+      ],
+      "expo-maps",
+      "expo-audio",
+      "expo-background-task",
+      "expo-font",
+      "expo-image",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "ExpoSink needs location access for testing apps."
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "ExpoSink needs contacts access for testing apps."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "ExpoSink needs calendar access for testing apps."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ExpoSink needs photo library access for testing apps.",
+          "cameraPermission": "ExpoSink needs camera access for testing apps.",
+          "microphonePermission": "ExpoSink needs microphone access for testing apps."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "ExpoSink needs photo library access for testing apps.",
+          "savePhotosPermission": "ExpoSink needs permission to save photos for testing apps."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "ExpoSink needs FaceID access for testing auth flows."
+        }
+      ],
+      "expo-mail-composer",
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-sqlite",
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "ExpoSink needs tracking permission for testing analytics."
+        }
+      ],
+      "expo-video",
+      "expo-web-browser",
+      "expo-widgets",
+      "@react-native-community/datetimepicker",
+      "expo-libvlc-player",
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,
