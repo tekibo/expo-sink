@@ -110,15 +110,7 @@
       "@react-native-community/datetimepicker",
       "expo-libvlc-player",
       "@sentry/react-native",
-      [
-        "llama.rn",
-        {
-          "enableEntitlements": true,
-          "entitlementsProfile": "production",
-          "forceCxx20": true,
-          "enableOpenCL": true
-        },
-      ]
+      "llama.rn"
     ],
     "experiments": {
       "typedRoutes": true,
