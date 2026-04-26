@@ -9,6 +9,7 @@ workflows:
       vars:
         # Define any env vars here or in the Codemagic UI
         BUNDLE_ID: "com.tekibo.exposink"
+        PATH: $PATH:$HOME/.bun/bin
     scripts:
       - name: 📥 Setup Bun
         script: |
