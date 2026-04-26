@@ -11,8 +11,10 @@ jobs:
       - name: 📥 Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: 🛠️ Setup Latest Xcode Dynamically
         uses: maxim-lobanov/setup-xcode@v1
@@ -20,7 +22,7 @@ jobs:
           xcode-version: "latest-stable"
 
       - name: 📦 Install Dependencies
-        run: bun install --frozen-lockfile
+        run: npm install
 
       - name: ⚙️ Expo prebuild
         run: bunx expo prebuild --platform ios --clean
