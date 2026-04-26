@@ -106,10 +106,7 @@
       ],
       "expo-video",
       "expo-web-browser",
-      "@react-native-community/datetimepicker",
-      [
-        "llama.rn"
-      ]
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
