@@ -34,34 +34,45 @@ jobs:
           pod repo update
           pod install
 
+      # 🏗 Build unsigned iOS dev client (Fixed Workspace/Scheme paths)
       - name: 🏗 Build unsigned iOS dev client
         shell: bash
         run: |
           set -o pipefail
           cd ios
 
-          xcodebuild build \
+          # Manually set names to avoid shell globbing errors
+          # Expo prebuild always creates [slug].xcworkspace
+          WORKSPACE="exposink.xcworkspace"
+          SCHEME="exposink"
+
+          xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
             -configuration Debug \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath $PWD/DerivedData \
+            -sdk iphoneos \
+            -derivedDataPath build \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
             CLANG_CXX_LANGUAGE_STANDARD="c++20" \
             CLANG_CXX_LIBRARY="libc++" \
+            OTHER_CPLUSPLUSFLAGS="-DFORCE_CXX20" \
             build | tee build.log
 
+      # 📦 Create unsigned IPA (Updated Path)
       - name: 📦 Create unsigned IPA
         shell: bash
         run: |
           set -e
           cd ios
 
+          # The path is now relative to the 'ios' folder because of the 'cd' above
           APP="build/Build/Products/Debug-iphoneos/exposink.app"
 
           if [ ! -d "$APP" ]; then
-            echo "App bundle not found"
+            echo "❌ App bundle not found at $APP"
             exit 1
           fi
 
