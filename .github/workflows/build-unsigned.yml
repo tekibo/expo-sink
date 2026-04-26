@@ -1,82 +1,85 @@
 name: Build Dev client
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-    build-ios:
-        runs-on: macos-latest
+  build-ios:
+    runs-on: macos-latest
 
-        steps:
-            - name: 📥 Checkout repo
-              uses: actions/checkout@v4
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
 
-            - name: 🟢 Setup Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-            - name: 🛠️ Setup Latest Xcode Dynamically
-              uses: maxim-lobanov/setup-xcode@v1
-              with:
-                  xcode-version: "latest-stable"
+      # - name: 🟢 Setup Node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #       node-version: 22
 
-            - name: 📦 Install Dependencies
-              run: npm install
+      - name: 🛠️ Setup Latest Xcode Dynamically
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "latest-stable"
 
-            - name: ⚙️ Expo prebuild
-              run: npx expo prebuild --platform ios --clean
+      - name: 📦 Install Dependencies
+        run: bun install --frozen-lockfile
 
-            # - name: 📦 Install CocoaPods
-            #   shell: bash
-            #   run: |
-            #       set -e
-            #       cd ios
-            #       rm -rf Pods Podfile.lock
-            #       pod repo update
-            #       pod install
+      - name: ⚙️ Expo prebuild
+        run: bunx expo prebuild --platform ios --clean
 
-            - name: 🏗 Build unsigned iOS dev client
-              shell: bash
-              run: |
-                  set -o pipefail
-                  cd ios
+      - name: 📦 Install CocoaPods
+        shell: bash
+        run: |
+          set -e
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod repo update
+          pod install
 
-                  xcodebuild \
-                    -workspace exposink.xcworkspace \
-                    -scheme exposink \
-                    -configuration Debug \
-                    -destination 'generic/platform=iOS' \
-                    -sdk iphoneos \
-                    -derivedDataPath build \
-                    CODE_SIGN_STYLE=Manual \
-                    CODE_SIGNING_REQUIRED=NO \
-                    CODE_SIGN_IDENTITY="" \
-                    build | tee build.log
+      - name: 🏗 Build unsigned iOS dev client
+        shell: bash
+        run: |
+          set -o pipefail
+          cd ios
 
-            - name: 📦 Create unsigned IPA
-              shell: bash
-              run: |
-                  set -e
-                  cd ios
+          xcodebuild \
+            -workspace exposink.xcworkspace \
+            -scheme exposink \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build | tee build.log
 
-                  APP="build/Build/Products/Debug-iphoneos/exposink.app"
+      - name: 📦 Create unsigned IPA
+        shell: bash
+        run: |
+          set -e
+          cd ios
 
-                  if [ ! -d "$APP" ]; then
-                    echo "App bundle not found"
-                    exit 1
-                  fi
+          APP="build/Build/Products/Debug-iphoneos/exposink.app"
 
-                  rm -rf Payload exposink-dev-client.ipa
-                  mkdir Payload
-                  cp -R "$APP" Payload/
+          if [ ! -d "$APP" ]; then
+            echo "App bundle not found"
+            exit 1
+          fi
 
-                  zip -qry exposink-dev-client.ipa Payload
-                  mv exposink-dev-client.ipa ..
+          rm -rf Payload exposink-dev-client.ipa
+          mkdir Payload
+          cp -R "$APP" Payload/
 
-            - name: 📤 Upload IPA
-              uses: actions/upload-artifact@v4
-              with:
-                  name: exposink-dev-client-ipa
-                  path: exposink-dev-client.ipa
-                  retention-days: 2
+          zip -qry exposink-dev-client.ipa Payload
+          mv exposink-dev-client.ipa ..
+
+      - name: 📤 Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: exposink-dev-client-ipa
+          path: exposink-dev-client.ipa
+          retention-days: 2
