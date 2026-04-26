@@ -1,0 +1,60 @@
+workflows:
+  build-dev-client:
+    name: Build Dev Client
+    instance_type: mac_mini_m2 # Optimized for speed
+    max_build_duration: 60
+    environment:
+      node: latest
+      xcode: latest
+      vars:
+        # Define any env vars here or in the Codemagic UI
+        BUNDLE_ID: "com.tekibo.exposink"
+    scripts:
+      - name: 📥 Setup Bun
+        script: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "export PATH=\"\$HOME/.bun/bin:\$PATH\"" >> $CM_ENV
+
+      - name: 📦 Install Dependencies
+        script: |
+          bun install --frozen-lockfile
+
+      - name: ⚙️ Expo prebuild
+        script: |
+          bunx expo prebuild --platform ios --clean
+
+      - name: 📦 Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: 🏗 Build unsigned iOS dev client
+        script: |
+          cd ios
+          xcodebuild \
+            -workspace exposink.xcworkspace \
+            -scheme exposink \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: 📦 Create unsigned IPA
+        script: |
+          cd ios
+          APP="build/Build/Products/Debug-iphoneos/exposink.app"
+          mkdir Payload
+          cp -R "$APP" Payload/
+          zip -qry exposink-dev-client.ipa Payload
+          mv exposink-dev-client.ipa $CM_EXPORT_DIR
+
+    artifacts:
+      - "*.ipa"
+    publishing:
+      email:
+        recipients:
+          - abhijit@tekibo.in
