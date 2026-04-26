@@ -32,7 +32,12 @@ workflows:
 
       - name: 🏗 Build unsigned iOS dev client
         script: |
+          set -e
+          set -o pipefail
           cd ios
+          
+          # AD_HOC_CODE_SIGNING_ALLOWED=YES is critical for unsigned device builds on Codemagic.
+          # CLANG_CXX flags ensure C++20 compatibility for llama.rn and Worklets.
           xcodebuild \
             -workspace exposink.xcworkspace \
             -scheme exposink \
@@ -43,15 +48,30 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            CLANG_CXX_LANGUAGE_STANDARD="c++20" \
+            CLANG_CXX_LIBRARY="libc++" \
+            OTHER_CPLUSPLUSFLAGS="-DFORCE_CXX20" \
             build | tee build.log
 
       - name: 📦 Create unsigned IPA
         script: |
+          set -e
           cd ios
-          APP="build/Build/Products/Debug-iphoneos/exposink.app"
-
-          if [ ! -d "$APP" ]; then
-            echo "❌ Error: .app bundle not found at $APP. Check build.log for details."
+          
+          # Dynamically find the app bundle to be safe
+          APP=$(find build/Build/Products -name "*.app" | head -n 1)
+          
+          if [ -z "$APP" ]; then
+            echo "❌ Error: .app bundle not found in build directory. Check build.log."
+            exit 1
+          fi
+          
+          echo "Found app bundle at: $APP"
+          
+          # Verify Info.plist exists
+          if [ ! -f "$APP/Info.plist" ]; then
+            echo "❌ Error: Info.plist missing from $APP. Build may have failed silently."
             exit 1
           fi
 
