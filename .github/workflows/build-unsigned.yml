@@ -22,9 +22,6 @@ jobs:
       - name: 📦 Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: ⚙️ Expo prebuild
-        run: bunx expo prebuild --platform ios --clean
-
       - name: 📦 Install CocoaPods
         shell: bash
         run: |

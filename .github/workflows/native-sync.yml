@@ -1,0 +1,52 @@
+name: Sync Native Folders and Commit
+
+on:
+  workflow_dispatch:
+  push:
+    # Trigger on any tag starting with 'sync-'
+    tags:
+      - 'sync-*'
+
+jobs:
+  sync-native:
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: 🛠️ Setup Latest Xcode Dynamically
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "latest-stable"
+
+      - name: 📦 Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: ⚙️ Expo prebuild
+        # --no-clean ensures manual native changes are preserved
+        run: bunx expo prebuild --no-clean
+
+      - name: 📦 Install CocoaPods
+        shell: bash
+        run: |
+          set -e
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod repo update
+          pod install
+
+      - name: 📝 Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sync native folders [skip ci]"
+          branch: main
+          file_pattern: 'ios/** android/**'
