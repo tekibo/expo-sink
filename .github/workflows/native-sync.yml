@@ -5,7 +5,7 @@ on:
   push:
     # Trigger on any tag starting with 'sync-'
     tags:
-      - 'sync-*'
+      - "sync-*"
 
 jobs:
   sync-native:
@@ -34,10 +34,6 @@ jobs:
       - name: ⚙️ Expo prebuild
         run: bunx expo prebuild
 
-      - name: 🛠️ Patch Podfile for ffmpeg-kit
-        run: |
-          sed -i '' "s/pod 'ffmpeg-kit-react-native'/pod 'ffmpeg-kit-react-native', :subspecs => ['min']/g" ios/Podfile
-
       - name: 📦 Install CocoaPods
         shell: bash
         run: |
@@ -52,4 +48,4 @@ jobs:
         with:
           commit_message: "chore: sync native folders [skip ci]"
           branch: main
-          file_pattern: 'ios/** android/**'
+          file_pattern: "ios/** android/**"
