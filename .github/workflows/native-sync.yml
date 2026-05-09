@@ -33,7 +33,7 @@ jobs:
 
       - name: ⚙️ Expo prebuild
         # --no-clean ensures manual native changes are preserved
-        run: bunx expo prebuild --no-clean
+        run: bunx expo prebuild
 
       - name: 📦 Install CocoaPods
         shell: bash
