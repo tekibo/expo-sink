@@ -32,8 +32,11 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: ⚙️ Expo prebuild
-        # --no-clean ensures manual native changes are preserved
         run: bunx expo prebuild
+
+      - name: 🛠️ Patch Podfile for ffmpeg-kit
+        run: |
+          sed -i '' "s/pod 'ffmpeg-kit-react-native'/pod 'ffmpeg-kit-react-native', :subspecs => ['min']/g" ios/Podfile
 
       - name: 📦 Install CocoaPods
         shell: bash
